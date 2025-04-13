@@ -11,5 +11,6 @@ April 13th 2025:
   - Player Model
   - Animations
 - Input System implementation
+- Implementation of the rigidbody and colliders of the character model
 - Fixed the following bugs:
   - Character movement around a large radius due to the animation being on root camera rather than the main camera 
