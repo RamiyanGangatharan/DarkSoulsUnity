@@ -40,15 +40,16 @@ namespace DarkSouls
             ignoreLayers = ~(1 << 8 | 1 << 9 | 1 << 10);
         }
 
+        void FixedUpdate()
+        {
+            float delta = Time.deltaTime;
+            FollowTarget(delta);
+        }
+
         public void FollowTarget(float delta)
         {
-            myTransform.position = Vector3.SmoothDamp(
-                myTransform.position,
-                targetTransform.position,
-                ref cameraFollowVelocity,
-                delta / followSpeed
-            );
-            
+            float smoothSpeed = Mathf.Clamp(followSpeed, 0.01f, 1f);
+            myTransform.position = Vector3.Lerp(myTransform.position, targetTransform.position, smoothSpeed);
             HandleCameraCollisions(delta);
         }
 

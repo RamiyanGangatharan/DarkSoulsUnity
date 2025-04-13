@@ -45,6 +45,7 @@ namespace DarkSouls
         private void FixedUpdate()
         {
             float delta = Time.fixedDeltaTime;
+            TickInput(delta);
 
             if (cameraHandler != null)
             {
