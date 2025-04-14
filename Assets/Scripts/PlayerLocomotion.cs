@@ -16,7 +16,7 @@ namespace DarkSouls
         [HideInInspector] public Transform myTransform;
         [HideInInspector] public AnimatorHandler animatorHandler;
 
-        public new Rigidbody rigidBody;
+        public Rigidbody rigidBody;
         public GameObject normalCamera;
 
         [Header("Stats")]

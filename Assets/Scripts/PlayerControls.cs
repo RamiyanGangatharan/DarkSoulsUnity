@@ -105,8 +105,8 @@ namespace DarkSouls
                 {
                     ""name"": ""Camera"",
                     ""type"": ""PassThrough"",
-                    ""id"": ""01a8b778-8c14-424a-9616-d31fdd7c0512"",
-                    ""expectedControlType"": ""Vector2"",
+                    ""id"": ""c0f6bfce-a69f-4325-aed3-d7399d9fda97"",
+                    ""expectedControlType"": ""Delta"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -170,21 +170,10 @@ namespace DarkSouls
                 },
                 {
                     ""name"": """",
-                    ""id"": ""14d1dbf9-d646-445d-8190-659d61336ed0"",
-                    ""path"": ""<Gamepad>/rightStick"",
-                    ""interactions"": """",
-                    ""processors"": ""StickDeadzone"",
-                    ""groups"": """",
-                    ""action"": ""Camera"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""ea1c0e2f-d9f6-4b9f-8ed1-4eec4a6f4819"",
+                    ""id"": ""afebd46b-b2c1-40ed-8e6f-aced456ded3b"",
                     ""path"": ""<Mouse>/delta"",
                     ""interactions"": """",
-                    ""processors"": ""NormalizeVector2"",
+                    ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Camera"",
                     ""isComposite"": false,
@@ -193,7 +182,24 @@ namespace DarkSouls
             ]
         }
     ],
-    ""controlSchemes"": []
+    ""controlSchemes"": [
+        {
+            ""name"": ""New Control Scheme"",
+            ""bindingGroup"": ""New Control Scheme"",
+            ""devices"": [
+                {
+                    ""devicePath"": ""<Mouse>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
+                },
+                {
+                    ""devicePath"": ""<Keyboard>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
+                }
+            ]
+        }
+    ]
 }");
             // Player Movement
             m_PlayerMovement = asset.FindActionMap("Player Movement", throwIfNotFound: true);
@@ -382,6 +388,19 @@ namespace DarkSouls
         /// Provides a new <see cref="PlayerMovementActions" /> instance referencing this action map.
         /// </summary>
         public PlayerMovementActions @PlayerMovement => new PlayerMovementActions(this);
+        private int m_NewControlSchemeSchemeIndex = -1;
+        /// <summary>
+        /// Provides access to the input control scheme.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputControlScheme" />
+        public InputControlScheme NewControlSchemeScheme
+        {
+            get
+            {
+                if (m_NewControlSchemeSchemeIndex == -1) m_NewControlSchemeSchemeIndex = asset.FindControlSchemeIndex("New Control Scheme");
+                return asset.controlSchemes[m_NewControlSchemeSchemeIndex];
+            }
+        }
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Player Movement" which allows adding and removing callbacks.
         /// </summary>

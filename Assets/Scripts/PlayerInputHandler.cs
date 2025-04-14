@@ -15,6 +15,7 @@ namespace DarkSouls
 
         PlayerControls inputActions;
         CameraHandler cameraHandler;
+        private Camera mainCamera;
 
         Vector2 movementInput;
         Vector2 cameraInput;
@@ -22,17 +23,19 @@ namespace DarkSouls
         private void Awake()
         {
             cameraHandler = CameraHandler.singleton;
+            mainCamera = Camera.main; // assign the main camera here
         }
 
         private void FixedUpdate()
         {
             float delta = Time.fixedDeltaTime;
-            if (cameraHandler != null) 
+            if (cameraHandler != null)
             {
                 cameraHandler.FollowTarget(delta);
-                cameraHandler.HandleCameraRotation(delta, mouseX, mouseY); 
+                cameraHandler.HandleCameraRotation(delta, mouseX, mouseY);
             }
         }
+
 
         public void OnEnable()
         {
@@ -60,8 +63,10 @@ namespace DarkSouls
             horizontal = movementInput.x;
             vertical = movementInput.y;
             moveAmount = Mathf.Clamp01(Mathf.Abs(horizontal) + Mathf.Abs(vertical));
+
             mouseX = cameraInput.x;
             mouseY = cameraInput.y;
         }
+
     }
 }

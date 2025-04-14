@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace DarkSouls
 {
@@ -26,6 +27,12 @@ namespace DarkSouls
         private float defaultPosition;
         private float lookAngle;
         private float pivotAngle;
+
+        private void Start()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape)) { Cursor.lockState = CursorLockMode.None; }
+            else { Cursor.lockState = CursorLockMode.Locked; }
+        }
 
         private void Awake()
         {
