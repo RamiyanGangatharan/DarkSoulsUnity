@@ -7,100 +7,77 @@ namespace DarkSouls
     /// </summary>
     public class PlayerLocomotion : MonoBehaviour
     {
-        [Header("References")]
+        Transform cameraObject;
+        PlayerInputHandler playerInputHandler;
+
+        Vector3 moveDirection;
+        Vector3 normalVector = Vector3.up;
+
         [HideInInspector] public Transform myTransform;
         [HideInInspector] public AnimatorHandler animatorHandler;
 
-        public new Rigidbody rigidbody;
-
+        public new Rigidbody rigidBody;
         public GameObject normalCamera;
 
         [Header("Stats")]
-        [SerializeField] private float movementSpeed = 1f;
-        [SerializeField] private float rotationSpeed = 10f;
+        [SerializeField] float movementSpeed = 5f;
+        [SerializeField] float rotationSpeed = 10f;
 
-        private PlayerInputHandler playerInputHandler;
-        private Transform cameraObject;
-        private Vector3 normalVector = Vector3.up;
-
-        /// <summary>
-        /// Initializes references and prepares components at start.
-        /// </summary>
-        void Start()
+        private void Start()
         {
-            rigidbody = GetComponent<Rigidbody>();
+            rigidBody = GetComponent<Rigidbody>();
             playerInputHandler = GetComponent<PlayerInputHandler>();
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
             cameraObject = Camera.main.transform;
             myTransform = transform;
-            animatorHandler?.Initialize();
+            animatorHandler.Initialize();
         }
 
-        /// <summary>
-        /// Updates input and movement every frame.
-        /// </summary>
-        void Update()
+        private void Update()
         {
             float delta = Time.deltaTime;
+
             playerInputHandler.TickInput(delta);
-            HandleMovement(delta);
-            HandleAnimator();
-            if (animatorHandler != null && animatorHandler.canRotate) { HandleRotation(delta); }
+            HandleMovementInput(delta);
+            animatorHandler.UpdateAnimatorValues(playerInputHandler.moveAmount, 0);
+
+            if (animatorHandler.canRotate)
+            {
+                HandleRotation(delta);
+            }
         }
 
-        /// <summary>
-        /// Handles movement logic relative to the camera direction.
-        /// </summary>
-        /// <param name="delta">The delta time for this frame.</param>
-        void HandleMovement(float delta)
+        private void FixedUpdate()
         {
-            Vector3 input = new Vector3(playerInputHandler.horizontal, 0f, playerInputHandler.vertical);
-
-            Vector3 camForward = cameraObject.forward;
-            Vector3 camRight = cameraObject.right;
-
-            camForward.y = 0;
-            camRight.y = 0;
-
-            camForward.Normalize();
-            camRight.Normalize();
-
-            Vector3 movement = camForward * input.z + camRight * input.x;
-            movement.Normalize();
-            movement *= movementSpeed;
-
-            Vector3 velocity = Vector3.ProjectOnPlane(movement, normalVector);
-            rigidbody.MovePosition(rigidbody.position + velocity * delta);
+            Move();
         }
 
-        /// <summary>
-        /// Updates animator parameters based on input.
-        /// </summary>
-        void HandleAnimator() { animatorHandler?.UpdateAnimatorValues(playerInputHandler.moveAmount, 0); }
-
-        /// <summary>
-        /// Smoothly rotates the player to face the direction of input.
-        /// </summary>
-        /// <param name="delta">The delta time for this frame.</param>
-        void HandleRotation(float delta)
+        private void HandleMovementInput(float delta)
         {
-            Vector3 inputDir = new Vector3(playerInputHandler.horizontal, 0f, playerInputHandler.vertical);
+            moveDirection = cameraObject.forward * playerInputHandler.vertical;
+            moveDirection += cameraObject.right * playerInputHandler.horizontal;
+            moveDirection.Normalize();
+            moveDirection *= movementSpeed;
+        }
 
-            if (inputDir.sqrMagnitude == 0f) { return; }
+        private void Move()
+        {
+            Vector3 projectedVelocity = Vector3.ProjectOnPlane(moveDirection, normalVector);
+            rigidBody.linearVelocity = projectedVelocity;
+        }
 
-            Vector3 camForward = cameraObject.forward;
-            Vector3 camRight = cameraObject.right;
+        private void HandleRotation(float delta)
+        {
+            Vector3 targetDirection = cameraObject.forward * playerInputHandler.vertical;
+            targetDirection += cameraObject.right * playerInputHandler.horizontal;
+            targetDirection.Normalize();
+            targetDirection.y = 0;
 
-            camForward.y = 0;
-            camRight.y = 0;
+            if (targetDirection == Vector3.zero)
+                targetDirection = myTransform.forward;
 
-            Vector3 targetDir = camForward * inputDir.z + camRight * inputDir.x;
-
-            if (targetDir.sqrMagnitude == 0f) { return; };
-
-            Quaternion targetRotation = Quaternion.LookRotation(targetDir.normalized);
+            Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
             Quaternion smoothedRotation = Quaternion.Slerp(myTransform.rotation, targetRotation, rotationSpeed * delta);
-
             myTransform.rotation = smoothedRotation;
         }
     }

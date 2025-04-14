@@ -350,7 +350,7 @@ GameObject:
   - component: {fileID: 1184074644}
   m_Layer: 10
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -435,7 +435,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   myTransform: {fileID: 0}
   animatorHandler: {fileID: 0}
-  rigidbody: {fileID: 1184074643}
+  rigidBody: {fileID: 1184074643}
   normalCamera: {fileID: 1663345212}
   movementSpeed: 5
   rotationSpeed: 10
@@ -647,7 +647,7 @@ Camera:
   m_Curvature: {x: 2, y: 11}
   m_BarrelClipping: 0.25
   m_Anamorphism: 0
-  m_SensorSize: {x: 36, y: 24}
+  m_SensorSize: {x: 24.892, y: 18.669}
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
@@ -657,7 +657,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60.000004
+  field of view: 48.3703
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -683,13 +683,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1663345212}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: -4}
+  m_LocalRotation: {x: 0.21268933, y: 0, z: 0, w: 0.97711986}
+  m_LocalPosition: {x: 0, y: 1, z: -4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1587165595}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 24.56, y: 0, z: 0}
 --- !u!114 &1663345216
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -846,7 +846,7 @@ GameObject:
   - component: {fileID: 2086601759}
   - component: {fileID: 2086601760}
   m_Layer: 10
-  m_Name: Camera Holder
+  m_Name: Camera Handler
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -888,9 +888,6 @@ MonoBehaviour:
   pivotSpeed: 0.03
   minimumPivot: -35
   maximumPivot: 35
-  cameraSphereRadius: 0.2
-  cameraCollisionOffset: 0.2
-  minimumCollisionOffset: 0.2
 --- !u!1 &2128948766
 GameObject:
   m_ObjectHideFlags: 0
