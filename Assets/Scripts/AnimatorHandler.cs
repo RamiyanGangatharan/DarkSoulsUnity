@@ -3,70 +3,92 @@ using UnityEngine;
 namespace DarkSouls
 {
     /// <summary>
-    /// Handles animator parameters related to movement in the game.
-    /// Updates the animator with snapped movement values for vertical and horizontal directions,
-    /// and controls the character's ability to rotate.
+    /// Handles animator parameters related to movement and interaction.
     /// </summary>
     public class AnimatorHandler : MonoBehaviour
     {
-        public Animator animator;
+        [HideInInspector] public Animator animator;
+        [HideInInspector] public PlayerInputHandler playerInputHandler;
+        [HideInInspector] public PlayerLocomotion playerLocomotion;
+        [HideInInspector] public PlayerManager playerManager;
 
-        int vertical;
-        int horizontal;
+        private int vertical;
+        private int horizontal;
 
         public bool canRotate;
 
-        /// <summary>
-        /// Initializes the Animator component and hashes the parameter names for vertical and horizontal movements.
-        /// </summary>
-        public void Initialize()
+        private void Awake()
         {
             animator = GetComponent<Animator>();
+            playerInputHandler = GetComponentInParent<PlayerInputHandler>();
+            playerLocomotion = GetComponentInParent<PlayerLocomotion>();
+            playerManager = GetComponentInParent<PlayerManager>();
 
-            // Convert parameter names to hash values for optimized performance.
             vertical = Animator.StringToHash("Vertical");
             horizontal = Animator.StringToHash("Horizontal");
+
+            if (!animator || !playerInputHandler || !playerLocomotion || !playerManager) { Debug.LogError("AnimatorHandler missing one or more required references."); }
         }
 
         /// <summary>
-        /// Updates the animator values for vertical and horizontal movement.
-        /// Snaps the movement values to predefined ranges (0, 0.5, -0.5, 1, -1) and applies them to the animator.
+        /// Updates animator blend tree values.
         /// </summary>
-        /// <param name="verticalMovement">The vertical movement value (e.g., forward/backward).</param>
-        /// <param name="horizontalMovement">The horizontal movement value (e.g., left/right).</param>
-        public void UpdateAnimatorValues(float verticalMovement, float horizontalMovement)
+        public void UpdateAnimatorValues(float verticalMovement, float horizontalMovement, bool isSprinting)
         {
-            // Default values to snap movements to predefined values.
-            float snappedVertical = 0;
-            float snappedHorizontal = 0;
+            if (animator.GetBool("isInteracting")) { return; }
 
-            // Snaps the vertical movement value to predefined ranges.
-            if (verticalMovement > 0 && verticalMovement < 0.55f) { snappedVertical = 0.5f; }
-            else if (verticalMovement > 0.55f) { snappedVertical = 1; }
-            else if (verticalMovement < 0 && verticalMovement > -0.55f) { snappedVertical = -0.5f; }
-            else if (verticalMovement < -0.55f) { snappedVertical = -1; }
+            float snappedVertical = SnapInput(verticalMovement);
+            float snappedHorizontal = SnapInput(horizontalMovement);
 
-            // Snaps the horizontal movement value to predefined ranges.
-            if (horizontalMovement > 0 && horizontalMovement < 0.55f) { snappedHorizontal = 0.5f; }
-            else if (horizontalMovement > 0.55f) { snappedHorizontal = 1; }
-            else if (horizontalMovement < 0 && horizontalMovement > -0.55f) { snappedHorizontal = -0.5f; }
-            else if (horizontalMovement < -0.55f) { snappedHorizontal = -1; }
-            else { snappedHorizontal = 0; }
+            if (isSprinting)
+            {
+                snappedVertical = 2f;
+                snappedHorizontal = horizontalMovement;
+            }
 
-            // Updates the animator with the snapped vertical and horizontal values.
-            // The third parameter (0.1f) is the transition speed, and Time.deltaTime ensures smooth animation.
             animator.SetFloat(vertical, snappedVertical, 0.1f, Time.deltaTime);
             animator.SetFloat(horizontal, snappedHorizontal, 0.1f, Time.deltaTime);
         }
 
-        /// <summary>
-        /// Allows the character to rotate by setting the canRotate flag to true.
-        /// </summary>
-        public void CanRotate() { canRotate = true; }
+        private float SnapInput(float input)
+        {
+            if (input > 0.55f) { return 1f; }
+            if (input > 0f) { return 0.5f; }
+            if (input < -0.55f) { return -1f; }
+            if (input < 0f) { return -0.5f; }
+            else { return 0f; }
+        }
 
         /// <summary>
-        /// Prevents the character from rotating by setting the canRotate flag to false.
+        /// Plays an animation with root motion and crossfade.
         /// </summary>
-        public void StopRotation() { canRotate = false; }
+        public void PlayTargetAnimation(string targetAnimation, bool isInteracting)
+        {
+            if (animator == null) { return; }
+            animator.applyRootMotion = isInteracting;
+            animator.SetBool("isInteracting", isInteracting);
+            animator.CrossFade(targetAnimation, 0.2f);
+        }
+
+        /// <summary>
+        /// This effectively attaches animations to a rigidbody properly
+        /// </summary>
+        private void OnAnimatorMove()
+        {
+            if (animator == null || playerManager == null || playerLocomotion == null) { return; }
+            if (!playerManager.isInteracting) { return; }
+
+            float delta = Time.deltaTime;
+            Vector3 deltaPosition = animator.deltaPosition;
+            deltaPosition.y = 0f;
+
+            Vector3 velocity = deltaPosition / delta;
+            playerLocomotion.rigidBody.linearDamping = 0f;
+            playerLocomotion.rigidBody.linearVelocity = velocity;
+        }
+
+        public void OnRollAnimationEnd() { if (animator != null) { animator.SetBool("isInteracting", false); } }
+        public void CanRotate() => canRotate = true;
+        public void StopRotation() => canRotate = false;
     }
 }

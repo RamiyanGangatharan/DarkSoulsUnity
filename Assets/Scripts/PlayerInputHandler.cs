@@ -7,82 +7,113 @@ namespace DarkSouls
     /// </summary>
     public class PlayerInputHandler : MonoBehaviour
     {
-        [Header("Movement Input")]
         public float horizontal;
         public float vertical;
-
-        [Header("Movement Input")]
         public float moveAmount;
-
-        [Header("Camera Input")]
         public float mouseX;
         public float mouseY;
 
-        private PlayerControls controls;
-        CameraHandler cameraHandler;
+        PlayerControls inputActions;
 
-        private Vector2 movementInput;
-        private Vector2 cameraInput;
+        Vector2 movementInput;
+        Vector2 cameraInput;
+
+        // Flags for roll and sprint state
+        public bool b_Input;
+        public bool rollFlag;
+        public bool sprintFlag;
+
+        // Reference to PlayerManager
+        public PlayerManager playerManager;
+
+        // Roll input timer
+        private float rollInputTimer;
 
         /// <summary>
-        /// Initializes the player input controls and subscribes to input events.
+        /// This function makes sure that input is being detected
         /// </summary>
-        private void Awake()
+        public void OnEnable()
         {
-            cameraHandler = CameraHandler.singleton;
-
-            if (controls == null)
+            if (inputActions == null)
             {
-                controls = new PlayerControls();
-                controls.PlayerMovement.Movement.performed += ctx => movementInput = ctx.ReadValue<Vector2>();
-                controls.PlayerMovement.Camera.performed += ctx => cameraInput = ctx.ReadValue<Vector2>();
+                inputActions = new PlayerControls();
+
+                // Movement input
+                inputActions.PlayerMovement.Movement.performed += inputActions => movementInput = inputActions.ReadValue<Vector2>();
+                inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
+
+                // Roll input
+                inputActions.PlayerActions.Roll.started += ctx => OnRollInputStart();
+                inputActions.PlayerActions.Roll.canceled += ctx => OnRollInputEnd();
             }
+
+            inputActions.Enable();
+        }
+
+        private void OnDisable() { inputActions.Disable(); }
+
+        /// <summary>
+        /// This calls movement and control functions every physics tick
+        /// </summary>
+        public void TickInput(float delta)
+        {
+            MoveInput();
+            HandleRollInput(delta);
         }
 
         /// <summary>
-        /// This function will control camera movements when operating the player
+        /// This converts a clamped mouse input to a visual rotation of the camera
         /// </summary>
-        private void FixedUpdate()
-        {
-            float delta = Time.fixedDeltaTime;
-
-            if (cameraHandler != null)
-            {
-                cameraHandler.FollowTarget(delta);
-                cameraHandler.HandleCameraRotation(delta, mouseX, mouseY);
-            }
-        }
-
-        /// <summary>
-        /// Enables the input actions when the object is active.
-        /// </summary>
-        private void OnEnable() => controls.Enable();
-
-        /// <summary>
-        /// Disables the input actions when the object is inactive.
-        /// </summary>
-        private void OnDisable() => controls.Disable();
-
-        /// <summary>
-        /// Called externally every frame to handle player input logic.
-        /// </summary>
-        /// <param name="delta">The delta time for the current frame.</param>
-        public void TickInput(float delta) { ProcessMovementInput(); } // Continuously update input values every frame.
-
-        /// <summary>
-        /// Processes movement and camera input to extract usable values for player movement and camera control.
-        /// </summary>
-        private void ProcessMovementInput()
+        private void MoveInput()
         {
             horizontal = movementInput.x;
             vertical = movementInput.y;
-
-            // Calculate movement amount based on input.
             moveAmount = Mathf.Clamp01(Mathf.Abs(horizontal) + Mathf.Abs(vertical));
 
-            // Capture mouse input for camera control.
             mouseX = cameraInput.x;
             mouseY = cameraInput.y;
         }
+
+        /// <summary>
+        /// Handles roll input and sets flags for sprinting or rolling based on duration of input.
+        /// </summary>
+        private void HandleRollInput(float delta)
+        {
+            if (b_Input)
+            {
+                // Increment roll timer when the button is held
+                rollInputTimer += delta;
+
+                if (rollInputTimer >= 0.5f)
+                {
+                    sprintFlag = true;
+                    rollFlag = false;  // Disable rolling while sprinting
+                }
+            }
+            else
+            {
+                // Button released, check if it was a short tap
+                if (rollInputTimer > 0f && rollInputTimer < 0.5f)
+                {
+                    rollFlag = true;  // Trigger roll if it was a short tap
+                    sprintFlag = false;
+                }
+                rollInputTimer = 0f;
+            }
+        }
+
+        /// <summary>
+        /// Called when the roll input starts (button press).
+        /// </summary>
+        private void OnRollInputStart()
+        {
+            b_Input = true;
+            rollFlag = false; 
+        }
+
+        /// <summary>
+        /// Called when the roll input ends (button release).
+        /// </summary>
+        private void OnRollInputEnd() { b_Input = false; }
     }
 }
