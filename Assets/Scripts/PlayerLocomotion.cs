@@ -12,8 +12,9 @@ namespace DarkSouls
         Transform cameraObject;
         PlayerInputHandler playerInputHandler;
 
-        Vector3 moveDirection;
-        Vector3 normalVector = Vector3.up; 
+        public Vector3 moveDirection;
+        Vector3 normalVector = Vector3.up;
+        Vector3 targetPosition;
 
         public Rigidbody rigidBody;
         public GameObject normalCamera;
@@ -25,8 +26,15 @@ namespace DarkSouls
         [SerializeField] float movementSpeed = 5f;     // Player's movement speed
         [SerializeField] float rotationSpeed = 10f;    // Speed at which the player rotates toward input direction
         [SerializeField] float sprintSpeed = 7f;       // Speed at which the player sprints at
+        [SerializeField] float fallingSpeed = 45f;     // Speed at which the player falls from the air
 
-        
+        [Header("Aerial & Ground Detection Statistics")]
+        [SerializeField] float groundDetectionRayStartPoint = 0.5f;
+        [SerializeField] float groundDirectionRayDistance = 0.2f;
+        [SerializeField] float minimumMandatoryFallDistance = 1.0f;
+        LayerMask ignoreForGroundCheck;
+        public float AirTimer;
+
 
         /// <summary>
         /// Initializes components required for player control and animation.
@@ -39,6 +47,8 @@ namespace DarkSouls
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
             cameraObject = Camera.main.transform;
             myTransform = transform;
+            playerManager.isGrounded = true;
+            ignoreForGroundCheck = ~(1 << 8 | 1 << 11);
         }
 
         /// <summary>
@@ -52,6 +62,7 @@ namespace DarkSouls
         public void HandleMovementInput(float delta)
         {
             if (playerInputHandler.rollFlag) { return; }
+            if (playerManager.isInteracting) { return; }
 
             moveDirection = cameraObject.forward * playerInputHandler.vertical;
             moveDirection += cameraObject.right * playerInputHandler.horizontal;
@@ -117,7 +128,7 @@ namespace DarkSouls
 
             // Allow movement after roll based on current input
             if (playerInputHandler.moveAmount > 0) { HandleMovementInput(playerInputHandler.moveAmount); }
-            else { rigidBody.linearVelocity = Vector3.zero; } 
+            else { rigidBody.linearVelocity = Vector3.zero; }
         }
 
 
@@ -176,6 +187,68 @@ namespace DarkSouls
                     StartCoroutine(PerformRollback(speed: 6f, duration: 0.6f));
                     playerInputHandler.rollFlag = false; // reset after consuming input
                 }
+            }
+        }
+
+        public void HandleFalling(float delta, Vector3 moveDirection)
+        {
+            playerManager.isGrounded = false;
+            RaycastHit hit;
+            Vector3 origin = myTransform.position;
+            origin.y += groundDetectionRayStartPoint;
+
+            if (Physics.Raycast(origin, myTransform.forward, out hit, 0.4f)) { moveDirection = Vector3.zero; }
+            if (playerManager.isAerial)
+            {
+                rigidBody.AddForce(Vector3.down * fallingSpeed);
+                rigidBody.AddForce(moveDirection * fallingSpeed / 5f);
+            }
+
+            Vector3 direction = moveDirection;
+            direction.Normalize();
+            origin = origin + direction * groundDirectionRayDistance;
+            targetPosition = myTransform.position;
+            Debug.DrawRay(origin, Vector3.down * minimumMandatoryFallDistance, Color.red, 0.1f, false);
+
+            if (Physics.Raycast(origin, Vector3.down, out hit, minimumMandatoryFallDistance, ignoreForGroundCheck))
+            {
+                normalVector = hit.normal;
+                Vector3 tp = hit.point; // tp is target position
+                playerManager.isGrounded = true;
+                targetPosition.y = tp.y;
+
+                if (playerManager.isAerial)
+                {
+                    if (AirTimer > 0.5f)
+                    {
+                        Debug.Log("Airtime: " + AirTimer);
+                        animatorHandler.PlayTargetAnimation("RollForward", true);
+                    }
+                    else { animatorHandler.PlayTargetAnimation("Empty", false); }
+
+                    playerManager.isAerial = false;
+                }
+            }
+            else
+            {
+                if (playerManager.isGrounded) { playerManager.isGrounded = false; }
+                if (playerManager.isAerial == false)
+                {
+                    if (playerManager.isInteracting == false) { animatorHandler.PlayTargetAnimation("FallingLoop", true); }
+
+                    Vector3 vel = rigidBody.linearVelocity; // vel is velocity
+                    vel.Normalize();
+                    rigidBody.linearVelocity = vel * (movementSpeed / 2);
+                    playerManager.isAerial = true;
+                }
+            }
+            if (playerManager.isGrounded)
+            {
+                if (playerManager.isInteracting || playerInputHandler.moveAmount > 0)
+                {
+                    myTransform.position = Vector3.Lerp(myTransform.position, targetPosition, Time.deltaTime);
+                }
+                else { myTransform.position = targetPosition; }
             }
         }
     }
