@@ -20,6 +20,10 @@ namespace DarkSouls
         Vector2 movementInput;
         Vector2 cameraInput;
 
+        public bool b_Input;
+        public bool rollFlag;
+        public bool isInteracting;
+
         private void Awake()
         {
             cameraHandler = CameraHandler.singleton;
@@ -56,6 +60,7 @@ namespace DarkSouls
         public void TickInput(float delta)
         {
             MoveInput(delta);
+            HandleRollInput(delta);
         }
 
         private void MoveInput(float delta)
@@ -67,6 +72,16 @@ namespace DarkSouls
             mouseX = cameraInput.x;
             mouseY = cameraInput.y;
         }
+
+        private void HandleRollInput(float delta)
+        {
+            var rollInput = inputActions.PlayerActions.Roll;
+            if (rollInput.triggered)
+            {
+                rollFlag = true;
+            }
+        }
+
 
     }
 }

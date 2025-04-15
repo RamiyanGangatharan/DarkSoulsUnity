@@ -10,6 +10,8 @@ namespace DarkSouls
     public class AnimatorHandler : MonoBehaviour
     {
         public Animator animator;
+        public PlayerInputHandler playerInputHandler;
+        public PlayerLocomotion playerLocomotion;
 
         int vertical;
         int horizontal;
@@ -22,6 +24,8 @@ namespace DarkSouls
         public void Initialize()
         {
             animator = GetComponent<Animator>();
+            playerInputHandler = GetComponentInParent<PlayerInputHandler>();
+            playerLocomotion = GetComponentInParent<PlayerLocomotion>();
 
             // Convert parameter names to hash values for optimized performance.
             vertical = Animator.StringToHash("Vertical");
@@ -36,6 +40,8 @@ namespace DarkSouls
         /// <param name="horizontalMovement">The horizontal movement value (e.g., left/right).</param>
         public void UpdateAnimatorValues(float verticalMovement, float horizontalMovement)
         {
+            if (animator.GetBool("isInteracting")) return;
+
             // Default values to snap movements to predefined values.
             float snappedVertical = 0;
             float snappedHorizontal = 0;
@@ -58,6 +64,40 @@ namespace DarkSouls
             animator.SetFloat(vertical, snappedVertical, 0.1f, Time.deltaTime);
             animator.SetFloat(horizontal, snappedHorizontal, 0.1f, Time.deltaTime);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="targetAnimation"></param>
+        /// <param name="isInteracting"></param>
+        public void PlayTargetAnimation(string targetAnimation, bool isInteracting)
+        {
+            animator.applyRootMotion = isInteracting;
+            animator.SetBool("isInteracting", isInteracting);
+            animator.CrossFade(targetAnimation, 0.2f);
+        }
+
+        private void OnAnimatorMove()
+        {
+            if (playerInputHandler.isInteracting == false)
+            {
+                return;
+            }
+
+            float delta = Time.deltaTime;
+            playerLocomotion.rigidBody.linearDamping = 0;
+            Vector3 deltaPosition = animator.deltaPosition;
+            deltaPosition.y = 0;
+            Vector3 velocity = deltaPosition / delta;
+            playerLocomotion.rigidBody.linearVelocity = velocity;
+
+        }
+
+        public void OnRollAnimationEnd()
+        {
+            animator.SetBool("isInteracting", false);
+        }
+
 
         /// <summary>
         /// Allows the character to rotate by setting the canRotate flag to true.
