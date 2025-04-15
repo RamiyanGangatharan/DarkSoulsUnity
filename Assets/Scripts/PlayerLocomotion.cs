@@ -190,66 +190,67 @@ namespace DarkSouls
             }
         }
 
+        /// <summary>
+        /// Handles player falling logic by applying gravity and limited air control while airborne,
+        /// detecting ground contact using raycasts, and triggering appropriate landing or falling animations.
+        /// Transitions the player between grounded and aerial states based on raycast hits and airtime duration.
+        /// </summary>
+        /// <param name="delta">Time passed since the last frame (used to accumulate airtime).</param>
+        /// <param name="moveDirection">The direction the player is attempting to move, used for in-air control and raycast orientation.</param>
         public void HandleFalling(float delta, Vector3 moveDirection)
         {
-            playerManager.isGrounded = false;
+            Vector3 origin = myTransform.position + Vector3.up * groundDetectionRayStartPoint;
             RaycastHit hit;
-            Vector3 origin = myTransform.position;
-            origin.y += groundDetectionRayStartPoint;
 
+            // Prevent movement if wall directly in front
             if (Physics.Raycast(origin, myTransform.forward, out hit, 0.4f)) { moveDirection = Vector3.zero; }
-            if (playerManager.isAerial)
+
+            // Downward ray to detect ground below
+            Vector3 rayDirection = moveDirection.normalized;
+            Vector3 rayOrigin = origin + rayDirection * groundDirectionRayDistance;
+
+            Debug.DrawRay(rayOrigin, Vector3.down * minimumMandatoryFallDistance, Color.green); // Debugging ray
+
+            bool hitGround = Physics.Raycast(rayOrigin, Vector3.down, out hit, minimumMandatoryFallDistance, ignoreForGroundCheck);
+
+            if (!hitGround)
             {
-                rigidBody.AddForce(Vector3.down * fallingSpeed);
-                rigidBody.AddForce(moveDirection * fallingSpeed / 5f);
-            }
+                // Still in air
+                playerManager.isGrounded = false;
 
-            Vector3 direction = moveDirection;
-            direction.Normalize();
-            origin = origin + direction * groundDirectionRayDistance;
-            targetPosition = myTransform.position;
-            Debug.DrawRay(origin, Vector3.down * minimumMandatoryFallDistance, Color.red, 0.1f, false);
-
-            if (Physics.Raycast(origin, Vector3.down, out hit, minimumMandatoryFallDistance, ignoreForGroundCheck))
-            {
-                normalVector = hit.normal;
-                Vector3 tp = hit.point; // tp is target position
-                playerManager.isGrounded = true;
-                targetPosition.y = tp.y;
-
-                if (playerManager.isAerial)
+                if (!playerManager.isAerial)
                 {
-                    if (AirTimer > 0.5f)
-                    {
-                        Debug.Log("Airtime: " + AirTimer);
-                        animatorHandler.PlayTargetAnimation("RollForward", true);
-                    }
-                    else { animatorHandler.PlayTargetAnimation("Empty", false); }
+                    if (!playerManager.isInteracting) { animatorHandler.PlayTargetAnimation("FallingLoop", true); }
+                    playerManager.isAerial = true;
+                }
 
-                    playerManager.isAerial = false;
+                AirTimer += delta;
+                Vector3 airControl = moveDirection.normalized * (movementSpeed * 0.2f);
+                Vector3 gravityForce = Vector3.down * fallingSpeed;
+                rigidBody.AddForce(gravityForce + airControl);
+                Vector3 horizontalVelocity = new Vector3(rigidBody.linearVelocity.x, 0, rigidBody.linearVelocity.z);
+                if (horizontalVelocity.magnitude > movementSpeed)
+                {
+                    Vector3 clamped = horizontalVelocity.normalized * movementSpeed;
+                    rigidBody.linearVelocity = new Vector3(clamped.x, rigidBody.linearVelocity.y, clamped.z);
                 }
             }
             else
             {
-                if (playerManager.isGrounded) { playerManager.isGrounded = false; }
-                if (playerManager.isAerial == false)
-                {
-                    if (playerManager.isInteracting == false) { animatorHandler.PlayTargetAnimation("FallingLoop", true); }
+                // Landed on ground
+                playerManager.isGrounded = true;
+                normalVector = hit.normal;
 
-                    Vector3 vel = rigidBody.linearVelocity; // vel is velocity
-                    vel.Normalize();
-                    rigidBody.linearVelocity = vel * (movementSpeed / 2);
-                    playerManager.isAerial = true;
-                }
-            }
-            if (playerManager.isGrounded)
-            {
-                if (playerManager.isInteracting || playerInputHandler.moveAmount > 0)
+                if (playerManager.isAerial)
                 {
-                    myTransform.position = Vector3.Lerp(myTransform.position, targetPosition, Time.deltaTime);
+                    if (AirTimer > 0.5f) { animatorHandler.PlayTargetAnimation("RollForward", true); }
+                    else { animatorHandler.PlayTargetAnimation("Idle", false); }
+
+                    AirTimer = 0;
+                    playerManager.isAerial = false;
                 }
-                else { myTransform.position = targetPosition; }
             }
         }
+
     }
 }
