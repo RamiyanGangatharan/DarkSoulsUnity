@@ -12,44 +12,22 @@ namespace DarkSouls
         public float moveAmount;
         public float mouseX;
         public float mouseY;
-        public float rollInputTimer;
 
         PlayerControls inputActions;
-        CameraHandler cameraHandler;
-        private Camera mainCamera;
 
         Vector2 movementInput;
         Vector2 cameraInput;
 
+        // Flags for roll and sprint state
         public bool b_Input;
         public bool rollFlag;
         public bool sprintFlag;
-        public bool isInteracting;
 
+        // Reference to PlayerManager
+        public PlayerManager playerManager;
 
-
-        /// <summary>
-        /// Camera Initialization
-        /// </summary>
-        private void Awake()
-        {
-            cameraHandler = CameraHandler.singleton;
-            mainCamera = Camera.main; // assign the main camera here
-        }
-
-        /// <summary>
-        /// Calls the camera handling functions every frame
-        /// </summary>
-        private void FixedUpdate()
-        {
-            float delta = Time.fixedDeltaTime;
-            if (cameraHandler != null)
-            {
-                cameraHandler.FollowTarget(delta);
-                cameraHandler.HandleCameraRotation(delta, mouseX, mouseY);
-            }
-        }
-
+        // Roll input timer
+        private float rollInputTimer;
 
         /// <summary>
         /// This function makes sure that input is being detected
@@ -59,12 +37,16 @@ namespace DarkSouls
             if (inputActions == null)
             {
                 inputActions = new PlayerControls();
+
+                // Movement input
                 inputActions.PlayerMovement.Movement.performed += inputActions => movementInput = inputActions.ReadValue<Vector2>();
                 inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
-                inputActions.PlayerActions.Roll.started += ctx => b_Input = true;
-                inputActions.PlayerActions.Roll.canceled += ctx => b_Input = false;
 
+                // Roll input
+                inputActions.PlayerActions.Roll.started += ctx => OnRollInputStart();
+                inputActions.PlayerActions.Roll.canceled += ctx => OnRollInputEnd();
             }
+
             inputActions.Enable();
         }
 
@@ -73,18 +55,16 @@ namespace DarkSouls
         /// <summary>
         /// This calls movement and control functions every physics tick
         /// </summary>
-        /// <param name="delta"></param>
         public void TickInput(float delta)
         {
-            MoveInput(delta);
+            MoveInput();
             HandleRollInput(delta);
         }
 
         /// <summary>
         /// This converts a clamped mouse input to a visual rotation of the camera
         /// </summary>
-        /// <param name="delta"></param>
-        private void MoveInput(float delta)
+        private void MoveInput()
         {
             horizontal = movementInput.x;
             vertical = movementInput.y;
@@ -95,33 +75,45 @@ namespace DarkSouls
         }
 
         /// <summary>
-        /// Handles input logic for rolling and sprinting based on how long the roll button is held.
-        /// A short tap triggers a roll, while holding the button for 0.5 seconds or longer triggers sprinting.
+        /// Handles roll input and sets flags for sprinting or rolling based on duration of input.
         /// </summary>
-        /// <param name="delta">Time passed since the last frame (used to measure input hold duration).</param>
-
         private void HandleRollInput(float delta)
         {
-            var rollInput = inputActions.PlayerActions.Roll;
-
-            if (rollInput.triggered) { rollInputTimer = 0f; } // Detect initial button press
-
-            // Check if the button is being held
             if (b_Input)
             {
+                // Increment roll timer when the button is held
                 rollInputTimer += delta;
-                if (rollInputTimer >= 0.5f) { sprintFlag = true; }
+
+                if (rollInputTimer >= 0.5f)
+                {
+                    sprintFlag = true;
+                    rollFlag = false;  // Disable rolling while sprinting
+                }
             }
             else
             {
-                // Button released: check if it was a short tap for roll
+                // Button released, check if it was a short tap
                 if (rollInputTimer > 0f && rollInputTimer < 0.5f)
                 {
-                    rollFlag = true;
+                    rollFlag = true;  // Trigger roll if it was a short tap
                     sprintFlag = false;
                 }
                 rollInputTimer = 0f;
             }
         }
+
+        /// <summary>
+        /// Called when the roll input starts (button press).
+        /// </summary>
+        private void OnRollInputStart()
+        {
+            b_Input = true;
+            rollFlag = false; 
+        }
+
+        /// <summary>
+        /// Called when the roll input ends (button release).
+        /// </summary>
+        private void OnRollInputEnd() { b_Input = false; }
     }
 }

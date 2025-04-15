@@ -8,11 +8,12 @@ namespace DarkSouls
     /// </summary>
     public class PlayerLocomotion : MonoBehaviour
     {
+        PlayerManager playerManager;
         Transform cameraObject;
         PlayerInputHandler playerInputHandler;
 
         Vector3 moveDirection;
-        Vector3 normalVector = Vector3.up; // Used to project movement onto a flat surface (like ground)
+        Vector3 normalVector = Vector3.up; 
 
         public Rigidbody rigidBody;
         public GameObject normalCamera;
@@ -20,43 +21,25 @@ namespace DarkSouls
         [HideInInspector] public Transform myTransform;
         [HideInInspector] public AnimatorHandler animatorHandler;
 
-        [Header("Stats")]
+        [Header("Movement Statistics")]
         [SerializeField] float movementSpeed = 5f;     // Player's movement speed
         [SerializeField] float rotationSpeed = 10f;    // Speed at which the player rotates toward input direction
         [SerializeField] float sprintSpeed = 7f;       // Speed at which the player sprints at
 
-        public bool isSprinting;
+        
 
         /// <summary>
         /// Initializes components required for player control and animation.
         /// </summary>
         private void Start()
         {
+            playerManager = GetComponent<PlayerManager>();
             rigidBody = GetComponent<Rigidbody>();
             playerInputHandler = GetComponent<PlayerInputHandler>();
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
             cameraObject = Camera.main.transform;
             myTransform = transform;
-            animatorHandler.Initialize();
         }
-
-        /// <summary>
-        /// Processes input and updates rotation/animation each frame.
-        /// </summary>
-        private void Update()
-        {
-            float delta = Time.deltaTime;
-
-            playerInputHandler.TickInput(delta); // FIRST: read inputs and set flags
-
-            HandleMovementInput(delta); // movement direction
-            HandleRollingandSprinting(delta); // maybe trigger roll/sprint
-
-            animatorHandler.UpdateAnimatorValues(playerInputHandler.moveAmount, 0, isSprinting); // set animation blend values
-
-            if (animatorHandler.canRotate) { HandleRotation(delta); }
-        }
-
 
         /// <summary>
         /// Applies movement to the Rigidbody each physics tick.
@@ -66,7 +49,7 @@ namespace DarkSouls
         /// <summary>
         /// Calculates the direction and magnitude of movement based on player input and camera.
         /// </summary>
-        private void HandleMovementInput(float delta)
+        public void HandleMovementInput(float delta)
         {
             if (playerInputHandler.rollFlag) { return; }
 
@@ -77,28 +60,26 @@ namespace DarkSouls
             float currentSpeed = playerInputHandler.sprintFlag ? sprintSpeed : movementSpeed;
 
             moveDirection *= currentSpeed;
-            isSprinting = playerInputHandler.sprintFlag;
+            playerManager.isSprinting = playerInputHandler.sprintFlag;
         }
 
 
         /// <summary>
         /// Moves the player character using physics, respecting surface orientation.
+        /// Projects the movement vector onto the plane defined by normalVector (typically the ground)
         /// </summary>
         private void Move()
         {
-            // Project the movement vector onto the plane defined by normalVector (typically the ground)
             Vector3 projectedVelocity = Vector3.ProjectOnPlane(moveDirection, normalVector);
             rigidBody.linearVelocity = projectedVelocity;
         }
-
-        // --------------------------------------------------------------------------------------
 
         private Vector3 currentVelocity = Vector3.zero; // Used by SmoothDamp to track velocity
 
         /// <summary>
         /// Rotates the player smoothly toward the direction of input relative to the camera.
         /// </summary>
-        private void HandleRotation(float delta)
+        public void HandleRotation(float delta)
         {
             // Determine the direction the player should face based on input
             Vector3 targetDirection = cameraObject.forward * playerInputHandler.vertical;
@@ -136,7 +117,7 @@ namespace DarkSouls
 
             // Allow movement after roll based on current input
             if (playerInputHandler.moveAmount > 0) { HandleMovementInput(playerInputHandler.moveAmount); }
-            else { rigidBody.linearVelocity = Vector3.zero; } // If no input, then stop
+            else { rigidBody.linearVelocity = Vector3.zero; } 
         }
 
 

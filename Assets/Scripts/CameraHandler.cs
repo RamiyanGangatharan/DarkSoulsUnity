@@ -26,6 +26,9 @@ namespace DarkSouls
         public float minimumPivot = -35f;
         public float maximumPivot = 35f;
         public float cameraSphereRadius = 0.2f;
+
+        [Header("Camera Collision Settings")]
+        [SerializeField] private float cameraCollisionSmoothTime = 0.2f;
         public float cameraCollisionOffset = 0.2f;
         public float minimumCollisionOffset = 0.2f;
 
@@ -33,6 +36,8 @@ namespace DarkSouls
         private float lookAngle;
         private float pivotAngle;
         private float targetPosition;
+
+        public PlayerManager playerManager;
 
         /// <summary>
         /// Locks or unlocks the cursor depending on input (mainly for editor testing).
@@ -48,6 +53,12 @@ namespace DarkSouls
         /// </summary>
         private void Awake()
         {
+            if (singleton != null && singleton != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
             singleton = this;
             myTransform = transform;
             defaultPosition = cameraTransform.localPosition.z;
@@ -57,21 +68,16 @@ namespace DarkSouls
         }
 
         /// <summary>
-        /// Updates camera position smoothly every frame after all updates.
-        /// </summary>
-        private void LateUpdate()
-        {
-            float delta = Time.deltaTime;
-            FollowTarget(delta);
-        }
-
-        /// <summary>
         /// Smoothly follows the target position using damping for smooth camera motion.
         /// In addition to this, this also implements camera collision logic.
         /// </summary>
         /// <param name="delta">Time delta for smooth interpolation</param>
         public void FollowTarget(float delta)
         {
+            // Check if the player is interacting or in combat and modify camera follow speed accordingly
+            if (playerManager.isInteracting) { followSpeed = 0.1f; } // Slow down camera follow when interacting 
+            else { followSpeed = 0.15f; } // Default follow speed
+
             Vector3 targetPosition = Vector3.SmoothDamp(myTransform.position, targetTransform.position, ref cameraFollowVelocity, delta / followSpeed);
             myTransform.position = targetPosition;
             HandleCameraCollision(delta);
@@ -85,12 +91,15 @@ namespace DarkSouls
         /// <param name="mouseYInput">Vertical mouse movement</param>
         public void HandleCameraRotation(float delta, float mouseXInput, float mouseYInput)
         {
+            // Modify look speed if the player is sprinting or interacting
+            if (playerManager.isSprinting) { lookSpeed = 0.15f; } // Speed up rotation when sprinting
+            else if (playerManager.isInteracting) { lookSpeed = 0.05f; } // Slow down rotation when interacting
+            else { lookSpeed = 0.1f; } // Default rotation speed
+
             // Accumulate input for smooth rotation
             lookAngle += (mouseXInput * lookSpeed);
             pivotAngle -= (mouseYInput * pivotSpeed);
-
-            // Clamp vertical rotation to prevent flipping
-            pivotAngle = Mathf.Clamp(pivotAngle, minimumPivot, maximumPivot);
+            pivotAngle = Mathf.Clamp(pivotAngle, minimumPivot, maximumPivot); // Clamp vertical rotation to prevent flipping
 
             // Apply horizontal (yaw) rotation to the camera's root
             Quaternion targetRotation = Quaternion.Euler(0, lookAngle, 0);
@@ -121,7 +130,7 @@ namespace DarkSouls
             }
 
             if (Mathf.Abs(targetPosition) < minimumCollisionOffset) { targetPosition -= minimumCollisionOffset; }
-            cameraTransformPosition.z = Mathf.Lerp(cameraTransform.localPosition.z, targetPosition, delta / 0.2f);
+            cameraTransformPosition.z = Mathf.Lerp(cameraTransform.localPosition.z, targetPosition, delta / cameraCollisionSmoothTime);
             cameraTransform.localPosition = cameraTransformPosition;
         }
     }
