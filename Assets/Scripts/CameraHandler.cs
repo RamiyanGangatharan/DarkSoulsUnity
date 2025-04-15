@@ -72,13 +72,7 @@ namespace DarkSouls
         /// <param name="delta">Time delta for smooth interpolation</param>
         public void FollowTarget(float delta)
         {
-            Vector3 targetPosition = Vector3.SmoothDamp(
-                myTransform.position,
-                targetTransform.position,
-                ref cameraFollowVelocity,
-                delta / followSpeed
-            );
-
+            Vector3 targetPosition = Vector3.SmoothDamp(myTransform.position, targetTransform.position, ref cameraFollowVelocity, delta / followSpeed);
             myTransform.position = targetPosition;
             HandleCameraCollision(delta);
         }

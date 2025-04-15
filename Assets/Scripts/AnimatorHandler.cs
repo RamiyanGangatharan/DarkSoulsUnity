@@ -26,19 +26,20 @@ namespace DarkSouls
             animator = GetComponent<Animator>();
             playerInputHandler = GetComponentInParent<PlayerInputHandler>();
             playerLocomotion = GetComponentInParent<PlayerLocomotion>();
-
-            // Convert parameter names to hash values for optimized performance.
             vertical = Animator.StringToHash("Vertical");
             horizontal = Animator.StringToHash("Horizontal");
         }
 
         /// <summary>
-        /// Updates the animator values for vertical and horizontal movement.
-        /// Snaps the movement values to predefined ranges (0, 0.5, -0.5, 1, -1) and applies them to the animator.
+        /// Updates the animator parameters for vertical and horizontal movement.
+        /// Movement values are snapped to predefined steps (0, ±0.5, ±1) to ensure consistent transitions in animations.
+        /// If the player is sprinting, vertical movement is set to 2 and horizontal remains analog for blend tree support.
         /// </summary>
-        /// <param name="verticalMovement">The vertical movement value (e.g., forward/backward).</param>
-        /// <param name="horizontalMovement">The horizontal movement value (e.g., left/right).</param>
-        public void UpdateAnimatorValues(float verticalMovement, float horizontalMovement)
+        /// <param name="verticalMovement">Forward/backward input intensity (-1 to 1).</param>
+        /// <param name="horizontalMovement">Left/right input intensity (-1 to 1).</param>
+        /// <param name="isSprinting">Whether the player is currently sprinting (affects animation behavior).</param>
+
+        public void UpdateAnimatorValues(float verticalMovement, float horizontalMovement, bool isSprinting)
         {
             if (animator.GetBool("isInteracting")) return;
 
@@ -59,6 +60,13 @@ namespace DarkSouls
             else if (horizontalMovement < -0.55f) { snappedHorizontal = -1; }
             else { snappedHorizontal = 0; }
 
+
+            if (isSprinting)
+            {
+                snappedVertical = 2;
+                snappedHorizontal = horizontalMovement;
+            }
+
             // Updates the animator with the snapped vertical and horizontal values.
             // The third parameter (0.1f) is the transition speed, and Time.deltaTime ensures smooth animation.
             animator.SetFloat(vertical, snappedVertical, 0.1f, Time.deltaTime);
@@ -66,10 +74,11 @@ namespace DarkSouls
         }
 
         /// <summary>
-        /// 
+        /// Plays the specified target animation using a smooth crossfade and sets interaction-related animation state.
+        /// Also enables or disables root motion depending on whether the player is interacting (e.g., rolling, attacking).
         /// </summary>
-        /// <param name="targetAnimation"></param>
-        /// <param name="isInteracting"></param>
+        /// <param name="targetAnimation">The name of the animation state to transition to.</param>
+        /// <param name="isInteracting">True if the player is performing an interaction that should affect movement (e.g., roll, attack); otherwise false.</param>
         public void PlayTargetAnimation(string targetAnimation, bool isInteracting)
         {
             animator.applyRootMotion = isInteracting;
@@ -77,36 +86,26 @@ namespace DarkSouls
             animator.CrossFade(targetAnimation, 0.2f);
         }
 
+        /// <summary>
+        /// This implements movement from the animation to the rigidbody
+        /// </summary>
         private void OnAnimatorMove()
         {
-            if (playerInputHandler.isInteracting == false)
-            {
-                return;
-            }
+            if (playerInputHandler.isInteracting == false) { return; }
 
             float delta = Time.deltaTime;
             playerLocomotion.rigidBody.linearDamping = 0;
+
             Vector3 deltaPosition = animator.deltaPosition;
             deltaPosition.y = 0;
+
             Vector3 velocity = deltaPosition / delta;
             playerLocomotion.rigidBody.linearVelocity = velocity;
 
         }
 
-        public void OnRollAnimationEnd()
-        {
-            animator.SetBool("isInteracting", false);
-        }
-
-
-        /// <summary>
-        /// Allows the character to rotate by setting the canRotate flag to true.
-        /// </summary>
+        public void OnRollAnimationEnd() { animator.SetBool("isInteracting", false); }
         public void CanRotate() { canRotate = true; }
-
-        /// <summary>
-        /// Prevents the character from rotating by setting the canRotate flag to false.
-        /// </summary>
         public void StopRotation() { canRotate = false; }
     }
 }

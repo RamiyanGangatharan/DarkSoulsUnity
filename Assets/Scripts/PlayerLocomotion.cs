@@ -23,6 +23,9 @@ namespace DarkSouls
         [Header("Stats")]
         [SerializeField] float movementSpeed = 5f;     // Player's movement speed
         [SerializeField] float rotationSpeed = 10f;    // Speed at which the player rotates toward input direction
+        [SerializeField] float sprintSpeed = 7f;       // Speed at which the player sprints at
+
+        public bool isSprinting;
 
         /// <summary>
         /// Initializes components required for player control and animation.
@@ -44,12 +47,16 @@ namespace DarkSouls
         {
             float delta = Time.deltaTime;
 
-            playerInputHandler.TickInput(delta); // Process player inputs
-            HandleMovementInput(delta); // Calculate intended movement direction based on camera orientation
-            animatorHandler.UpdateAnimatorValues(playerInputHandler.moveAmount, 0); // Update animations with current input
+            playerInputHandler.TickInput(delta); // FIRST: read inputs and set flags
+
+            HandleMovementInput(delta); // movement direction
+            HandleRollingandSprinting(delta); // maybe trigger roll/sprint
+
+            animatorHandler.UpdateAnimatorValues(playerInputHandler.moveAmount, 0, isSprinting); // set animation blend values
+
             if (animatorHandler.canRotate) { HandleRotation(delta); }
-            HandleRollingandSprinting(delta);
         }
+
 
         /// <summary>
         /// Applies movement to the Rigidbody each physics tick.
@@ -61,11 +68,18 @@ namespace DarkSouls
         /// </summary>
         private void HandleMovementInput(float delta)
         {
+            if (playerInputHandler.rollFlag) { return; }
+
             moveDirection = cameraObject.forward * playerInputHandler.vertical;
             moveDirection += cameraObject.right * playerInputHandler.horizontal;
             moveDirection.Normalize();
-            moveDirection *= movementSpeed;
+
+            float currentSpeed = playerInputHandler.sprintFlag ? sprintSpeed : movementSpeed;
+
+            moveDirection *= currentSpeed;
+            isSprinting = playerInputHandler.sprintFlag;
         }
+
 
         /// <summary>
         /// Moves the player character using physics, respecting surface orientation.
@@ -95,17 +109,19 @@ namespace DarkSouls
             if (targetDirection == Vector3.zero) { targetDirection = myTransform.forward; }
 
             // Smoothly interpolate the forward direction to the target using SmoothDamp
-            Vector3 smoothedDirection = Vector3.SmoothDamp(
-                myTransform.forward,
-                targetDirection,
-                ref currentVelocity,
-                1f / rotationSpeed // Inverse of speed gives smoothing time
-            );
+            Vector3 smoothedDirection = Vector3.SmoothDamp(myTransform.forward, targetDirection, ref currentVelocity, 1f / rotationSpeed);
 
             // Apply the new rotation if the smoothed direction is valid
             if (smoothedDirection != Vector3.zero) { myTransform.rotation = Quaternion.LookRotation(smoothedDirection); }
         }
 
+        /// <summary>
+        /// Performs a forward roll movement by applying velocity in the forward direction
+        /// for the specified duration and speed. After rolling, resumes normal movement if input is detected.
+        /// </summary>
+        /// <param name="speed">The speed at which the player rolls forward.</param>
+        /// <param name="duration">The duration of the roll in seconds.</param>
+        /// <returns>An IEnumerator for coroutine execution.</returns>
         public IEnumerator PerformRollForward(float speed, float duration)
         {
             float timer = 0f;
@@ -124,6 +140,13 @@ namespace DarkSouls
         }
 
 
+        /// <summary>
+        /// Performs a backward roll (dodge) by applying velocity in the backward direction
+        /// for the specified duration and speed. Stops player movement after completion.
+        /// </summary>
+        /// <param name="speed">The speed at which the player rolls backward.</param>
+        /// <param name="duration">The duration of the roll in seconds.</param>
+        /// <returns>An IEnumerator for coroutine execution.</returns>
         public IEnumerator PerformRollback(float speed, float duration)
         {
             float timer = 0f;
@@ -139,6 +162,11 @@ namespace DarkSouls
         }
 
 
+        /// <summary>
+        /// Handles the logic for initiating rolling and sprinting based on player input.
+        /// Plays appropriate animations and initiates forward or backward roll movement depending on direction.
+        /// </summary>
+        /// <param name="delta">Time passed since the last frame, used for time-based calculations.</param>
         public void HandleRollingandSprinting(float delta)
         {
             if (animatorHandler.animator.GetBool("isInteracting")) { return; }

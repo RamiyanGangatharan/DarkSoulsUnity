@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace DarkSouls
 {
+    /// <summary>
+    /// This class manages the player's state of motion
+    /// </summary>
     public class PlayerManager : MonoBehaviour
     {
         PlayerInputHandler inputHandler;
@@ -19,6 +22,7 @@ namespace DarkSouls
         {
             inputHandler.isInteracting = animator.GetBool("isInteracting");
             inputHandler.rollFlag = false;
+            inputHandler.sprintFlag = false;
         }
     }
 
