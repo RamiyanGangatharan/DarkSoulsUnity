@@ -17,6 +17,8 @@ namespace DarkSouls
         public bool isInteracting;
         public bool isSprinting;
         public bool isRolling;
+        public bool isAerial;
+        public bool isGrounded;
 
         public float rollInputTimer;
 
@@ -54,6 +56,7 @@ namespace DarkSouls
 
                 playerLocomotion.HandleMovementInput(delta);
                 playerLocomotion.HandleRollingandSprinting(delta);
+                playerLocomotion.HandleFalling(delta, playerLocomotion.moveDirection);
                 playerLocomotion.animatorHandler.UpdateAnimatorValues(inputHandler.moveAmount, 0, isSprinting);
 
                 if (playerLocomotion.animatorHandler.canRotate) { playerLocomotion.HandleRotation(delta); }
@@ -88,7 +91,10 @@ namespace DarkSouls
                 cameraHandler.FollowTarget(delta);
                 inputHandler.rollFlag = false;
                 inputHandler.sprintFlag = false;
-                isSprinting = inputHandler.sprintFlag; 
+                isSprinting = inputHandler.sprintFlag;
+
+                if (isAerial)
+                { playerLocomotion.AirTimer = playerLocomotion.AirTimer + Time.deltaTime; }
             }
             else { Debug.LogError("CameraHandler is null in LateUpdate."); }
         }
