@@ -641,7 +641,7 @@ MonoBehaviour:
   movementSpeed: 5
   rotationSpeed: 10
   sprintSpeed: 7
-  fallingSpeed: 60
+  fallingSpeed: 100
   groundDetectionRayStartPoint: 0.5
   groundDirectionRayDistance: 0.2
   minimumMandatoryFallDistance: 2
