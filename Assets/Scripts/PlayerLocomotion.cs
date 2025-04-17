@@ -94,6 +94,7 @@ namespace DarkSouls
         {
             // Determine the direction the player should face based on input
             Vector3 targetDirection = cameraObject.forward * playerInputHandler.vertical;
+
             targetDirection += cameraObject.right * playerInputHandler.horizontal;
             targetDirection.Normalize();
             targetDirection.y = 0; // Ensure rotation happens only on the Y axis (horizontal)
@@ -101,7 +102,12 @@ namespace DarkSouls
             if (targetDirection == Vector3.zero) { targetDirection = myTransform.forward; }
 
             // Smoothly interpolate the forward direction to the target using SmoothDamp
-            Vector3 smoothedDirection = Vector3.SmoothDamp(myTransform.forward, targetDirection, ref currentVelocity, 1f / rotationSpeed);
+            Vector3 smoothedDirection = Vector3.SmoothDamp(
+                myTransform.forward, 
+                targetDirection, 
+                ref currentVelocity, 
+                1f / rotationSpeed
+            );
 
             // Apply the new rotation if the smoothed direction is valid
             if (smoothedDirection != Vector3.zero) { myTransform.rotation = Quaternion.LookRotation(smoothedDirection); }
@@ -215,8 +221,23 @@ namespace DarkSouls
             direction.Normalize();
             origin = origin + direction * groundDirectionRayDistance;
             targetPosition = myTransform.position;
-            Debug.DrawRay(origin, -Vector3.up * minimumMandatoryFallDistance, Color.red, 0.1f, false);
-            if (Physics.Raycast(origin, -Vector3.up, out hit, minimumMandatoryFallDistance,ignoreForGroundCheck))
+
+            Debug.DrawRay(
+                origin, 
+                -Vector3.up * minimumMandatoryFallDistance, 
+                Color.red, 
+                0.1f, 
+                false
+            );
+
+            if (Physics.Raycast(
+                    origin, 
+                    -Vector3.up, 
+                    out hit, 
+                    minimumMandatoryFallDistance, 
+                    ignoreForGroundCheck
+                    )
+                )
             {
                 normalVector = hit.normal;
                 Vector3 tp = hit.point;
@@ -224,46 +245,34 @@ namespace DarkSouls
 
                 if (playerManager.isAerial)
                 {
-                    if (AirTimer > 0.5f)
-                    {
-                        animatorHandler.PlayTargetAnimation("RollForward", true);
-                        AirTimer = 0;
-                    }
-                    else
-                    {
-                        animatorHandler.PlayTargetAnimation("Locomotion", false);
-                        AirTimer = 0;
-                    }
+                    if (AirTimer > 0.5f) { animatorHandler.PlayTargetAnimation("RollForward", true); AirTimer = 0; }
+                    else { animatorHandler.PlayTargetAnimation("Locomotion", false); AirTimer = 0; }
                     playerManager.isAerial = false;
                 }
             }
             else
             {
-                if (playerManager.isGrounded)
-                {
-                    playerManager.isGrounded = false;
-                }
+                if (playerManager.isGrounded) { playerManager.isGrounded = false; }
                 if (playerManager.isAerial == false)
                 {
-                    if (playerManager.isInteracting == false)
-                    {
-                        animatorHandler.PlayTargetAnimation("FallingLoop", true);
-                    }
+                    if (playerManager.isInteracting == false) { animatorHandler.PlayTargetAnimation("FallingLoop", true); }
 
                     Vector3 vel = rigidBody.linearVelocity;
                     vel.Normalize();
+
                     rigidBody.linearVelocity = vel * (movementSpeed / 2);
                     playerManager.isAerial = true;
                 }
             }
             if (playerManager.isInteracting || playerInputHandler.moveAmount > 0)
             {
-                myTransform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime);
+                myTransform.position = Vector3.Lerp(
+                    transform.position, 
+                    targetPosition, 
+                    Time.deltaTime
+                );
             }
-            else
-            {
-                myTransform.position = targetPosition;
-            }
+            else { myTransform.position = targetPosition; }
         }
     }
 }
