@@ -81,39 +81,18 @@ namespace DarkSouls
         {
             if (b_Input)
             {
-                // Increment roll timer when the button is held
-                rollInputTimer += delta;
-
-                if (rollInputTimer >= 0.5f)
-                {
-                    sprintFlag = true;
-                    rollFlag = false;  // Disable rolling while sprinting
-                }
+                rollInputTimer += delta; // Increment roll timer when the button is held
+                if (rollInputTimer >= 0.5f) { sprintFlag = true; rollFlag = false; }
             }
             else
             {
                 // Button released, check if it was a short tap
-                if (rollInputTimer > 0f && rollInputTimer < 0.5f)
-                {
-                    rollFlag = true;  // Trigger roll if it was a short tap
-                    sprintFlag = false;
-                }
+                if (rollInputTimer > 0f && rollInputTimer < 0.5f) { rollFlag = true; sprintFlag = false; }
                 rollInputTimer = 0f;
             }
         }
 
-        /// <summary>
-        /// Called when the roll input starts (button press).
-        /// </summary>
-        private void OnRollInputStart()
-        {
-            b_Input = true;
-            rollFlag = false; 
-        }
-
-        /// <summary>
-        /// Called when the roll input ends (button release).
-        /// </summary>
+        private void OnRollInputStart() { b_Input = true; rollFlag = false;}
         private void OnRollInputEnd() { b_Input = false; }
     }
 }

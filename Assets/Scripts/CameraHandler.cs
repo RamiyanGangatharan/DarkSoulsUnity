@@ -53,12 +53,7 @@ namespace DarkSouls
         /// </summary>
         private void Awake()
         {
-            if (singleton != null && singleton != this)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
+            if (singleton != null && singleton != this) { Destroy(gameObject); return; }
             singleton = this;
             myTransform = transform;
             defaultPosition = cameraTransform.localPosition.z;
@@ -78,7 +73,13 @@ namespace DarkSouls
             if (playerManager.isInteracting) { followSpeed = 0.1f; } // Slow down camera follow when interacting 
             else { followSpeed = 0.15f; } // Default follow speed
 
-            Vector3 targetPosition = Vector3.SmoothDamp(myTransform.position, targetTransform.position, ref cameraFollowVelocity, delta / followSpeed);
+            Vector3 targetPosition = Vector3.SmoothDamp(
+                myTransform.position, 
+                targetTransform.position, 
+                ref cameraFollowVelocity, 
+                delta / followSpeed
+            );
+
             myTransform.position = targetPosition;
             HandleCameraCollision(delta);
         }
@@ -123,14 +124,25 @@ namespace DarkSouls
             Vector3 direction = cameraTransform.position - cameraPivotTransform.position;
             direction.Normalize();
 
-            if (Physics.SphereCast(cameraPivotTransform.position, cameraSphereRadius, direction, out hit, Mathf.Abs(targetPosition), ignoreLayers))
+            if (Physics.SphereCast(
+                cameraPivotTransform.position, 
+                cameraSphereRadius, 
+                direction, out hit, 
+                Mathf.Abs(targetPosition), ignoreLayers)
+            )
             {
                 float dis = Vector3.Distance(cameraPivotTransform.position, hit.point);
                 targetPosition = -(dis - cameraCollisionOffset);
             }
 
             if (Mathf.Abs(targetPosition) < minimumCollisionOffset) { targetPosition -= minimumCollisionOffset; }
-            cameraTransformPosition.z = Mathf.Lerp(cameraTransform.localPosition.z, targetPosition, delta / cameraCollisionSmoothTime);
+
+            cameraTransformPosition.z = Mathf.Lerp(
+                cameraTransform.localPosition.z, 
+                targetPosition, 
+                delta / cameraCollisionSmoothTime
+            );
+
             cameraTransform.localPosition = cameraTransformPosition;
         }
     }
