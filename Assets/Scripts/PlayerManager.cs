@@ -91,9 +91,10 @@ namespace DarkSouls
                 cameraHandler.FollowTarget(delta);
                 inputHandler.rollFlag = false;
                 inputHandler.sprintFlag = false;
+                inputHandler.rb_Input = false;
+                inputHandler.rt_Input = false;
 
-                if (isAerial)
-                { playerLocomotion.AirTimer = playerLocomotion.AirTimer + Time.deltaTime; }
+                if (isAerial) { playerLocomotion.AirTimer = playerLocomotion.AirTimer + Time.deltaTime; }
             }
             else { Debug.LogError("CameraHandler is null in LateUpdate."); }
         }

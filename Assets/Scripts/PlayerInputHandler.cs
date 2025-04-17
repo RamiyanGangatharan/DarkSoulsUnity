@@ -14,12 +14,17 @@ namespace DarkSouls
         public float mouseY;
 
         PlayerControls inputActions;
+        PlayerAttacker playerAttacker;
+
+        PlayerInventory playerInventory;
 
         Vector2 movementInput;
         Vector2 cameraInput;
 
         // Flags for roll and sprint state
         public bool b_Input;
+        public bool rb_Input;
+        public bool rt_Input;
         public bool rollFlag;
         public bool sprintFlag;
 
@@ -28,6 +33,12 @@ namespace DarkSouls
 
         // Roll input timer
         private float rollInputTimer;
+
+        private void Awake()
+        {
+            playerAttacker = GetComponent<PlayerAttacker>();
+            playerInventory = GetComponent<PlayerInventory>();
+        }
 
         /// <summary>
         /// This function makes sure that input is being detected
@@ -59,6 +70,7 @@ namespace DarkSouls
         {
             MoveInput();
             HandleRollInput(delta);
+            //HandleAttackInput(delta);
         }
 
         /// <summary>
@@ -94,5 +106,15 @@ namespace DarkSouls
 
         private void OnRollInputStart() { b_Input = true; rollFlag = false;}
         private void OnRollInputEnd() { b_Input = false; }
+
+        //private void HandleAttackInput(float delta)
+        //{
+        //    // RB AND RT HANDLE RIGHT HAND ATTACKS
+        //    inputActions.PlayerActions.RB.performed += i => rb_Input = true;
+        //    inputActions.PlayerActions.RT.performed += i => rt_Input = true;
+
+        //    if (rb_Input) { playerAttacker.HandleLightAttack(playerInventory.rightWeapon); }
+        //    if (rt_Input) { playerAttacker.HandleHeavyAttack(playerInventory.rightWeapon); }
+        //}
     }
 }

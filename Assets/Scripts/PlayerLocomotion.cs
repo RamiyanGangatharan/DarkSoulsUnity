@@ -124,19 +124,32 @@ namespace DarkSouls
         public IEnumerator PerformRollForward(float speed, float duration)
         {
             float timer = 0f;
-            Vector3 forwardDirection = myTransform.forward;
+
+            // Use moveDirection from input for rolling direction
+            Vector3 rollDirection = cameraObject.forward * playerInputHandler.vertical + cameraObject.right * playerInputHandler.horizontal;
+
+            rollDirection.y = 0f;
+            rollDirection.Normalize();
+
+            // Rotate the player to face the roll direction
+            if (rollDirection != Vector3.zero)
+            {
+                Quaternion rollRotation = Quaternion.LookRotation(rollDirection);
+                myTransform.rotation = rollRotation;
+            }
 
             while (timer < duration)
             {
-                rigidBody.linearVelocity = forwardDirection * speed;
+                rigidBody.linearVelocity = rollDirection * speed;
                 timer += Time.deltaTime;
-                yield return new WaitForSeconds(0.1f);
+                yield return null;
             }
 
-            // Allow movement after roll based on current input
+            // Stop or resume based on input
             if (playerInputHandler.moveAmount > 0) { HandleMovementInput(playerInputHandler.moveAmount); }
             else { rigidBody.linearVelocity = Vector3.zero; }
         }
+
 
 
         /// <summary>
@@ -149,7 +162,10 @@ namespace DarkSouls
         public IEnumerator PerformRollback(float speed, float duration)
         {
             float timer = 0f;
+
             Vector3 backwardDirection = -myTransform.forward;
+            backwardDirection.y = 0f;
+            backwardDirection.Normalize();
 
             while (timer < duration)
             {
@@ -157,8 +173,10 @@ namespace DarkSouls
                 timer += Time.deltaTime;
                 yield return null;
             }
-            rigidBody.linearVelocity = Vector3.zero; // Stop motion after rollback
+
+            rigidBody.linearVelocity = Vector3.zero;
         }
+
 
 
         /// <summary>
@@ -178,20 +196,20 @@ namespace DarkSouls
 
                 if (playerInputHandler.moveAmount > 0)
                 {
-                    animatorHandler.PlayTargetAnimation("RollForward", true);
+                    animatorHandler.animator.CrossFade("RollForward", 0.1f); // 0.1f is blend duration
                     Quaternion rollRotation = Quaternion.LookRotation(moveDirection);
                     myTransform.rotation = rollRotation;
-                    StartCoroutine(PerformRollForward(speed: 6f, duration: 0.6f));
+                    StartCoroutine(PerformRollForward(speed: 12f, duration: 0.6f));
                     playerInputHandler.rollFlag = false; // reset after consuming input
                 }
                 else
                 {
-                    animatorHandler.PlayTargetAnimation("RollBackward", true);
+                    animatorHandler.animator.CrossFade("RollBackward", 0.1f); // 0.1f is blend duration
                     Vector3 backwardDirection = -myTransform.forward;
                     backwardDirection.y = 0;
                     Quaternion rollRotation = Quaternion.LookRotation(backwardDirection);
                     myTransform.rotation = rollRotation;
-                    StartCoroutine(PerformRollback(speed: 6f, duration: 0.6f));
+                    StartCoroutine(PerformRollback(speed: 12f, duration: 0.6f));
                     playerInputHandler.rollFlag = false; // reset after consuming input
                 }
             }
