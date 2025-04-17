@@ -34,6 +34,7 @@ namespace DarkSouls
         // Roll input timer
         private float rollInputTimer;
 
+
         private void Awake()
         {
             playerAttacker = GetComponent<PlayerAttacker>();

@@ -20,9 +20,9 @@ namespace DarkSouls
         public static CameraHandler singleton;
 
         [Header("Camera Settings")]
-        public float lookSpeed = 0.1f;
+        public float lookSpeed = 2.0f;
         public float followSpeed = 0.15f;
-        public float pivotSpeed = 0.03f;
+        public float pivotSpeed = 1.5f;
         public float minimumPivot = -35f;
         public float maximumPivot = 35f;
         public float cameraSphereRadius = 0.2f;
