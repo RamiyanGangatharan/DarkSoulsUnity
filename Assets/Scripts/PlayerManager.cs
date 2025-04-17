@@ -91,7 +91,6 @@ namespace DarkSouls
                 cameraHandler.FollowTarget(delta);
                 inputHandler.rollFlag = false;
                 inputHandler.sprintFlag = false;
-                isSprinting = inputHandler.sprintFlag;
 
                 if (isAerial)
                 { playerLocomotion.AirTimer = playerLocomotion.AirTimer + Time.deltaTime; }

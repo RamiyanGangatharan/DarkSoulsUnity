@@ -61,19 +61,20 @@ namespace DarkSouls
         /// </summary>
         public void HandleMovementInput(float delta)
         {
-            if (playerInputHandler.rollFlag) { return; }
-            if (playerManager.isInteracting) { return; }
+            if (playerInputHandler.rollFlag) return;
+            if (playerManager.isInteracting) return;
 
             moveDirection = cameraObject.forward * playerInputHandler.vertical;
             moveDirection += cameraObject.right * playerInputHandler.horizontal;
             moveDirection.Normalize();
 
-            float currentSpeed = playerInputHandler.sprintFlag ? sprintSpeed : movementSpeed;
+            float currentSpeed = playerInputHandler.sprintFlag && playerInputHandler.moveAmount > 0 ? sprintSpeed : movementSpeed;
 
             moveDirection *= currentSpeed;
-            playerManager.isSprinting = playerInputHandler.sprintFlag;
-        }
 
+            // Only sprint if there's movement input and sprint flag is active
+            playerManager.isSprinting = playerInputHandler.sprintFlag && playerInputHandler.moveAmount > 0;
+        }
 
         /// <summary>
         /// Moves the player character using physics, respecting surface orientation.
@@ -103,9 +104,9 @@ namespace DarkSouls
 
             // Smoothly interpolate the forward direction to the target using SmoothDamp
             Vector3 smoothedDirection = Vector3.SmoothDamp(
-                myTransform.forward, 
-                targetDirection, 
-                ref currentVelocity, 
+                myTransform.forward,
+                targetDirection,
+                ref currentVelocity,
                 1f / rotationSpeed
             );
 
@@ -223,18 +224,18 @@ namespace DarkSouls
             targetPosition = myTransform.position;
 
             Debug.DrawRay(
-                origin, 
-                -Vector3.up * minimumMandatoryFallDistance, 
-                Color.red, 
-                0.1f, 
+                origin,
+                -Vector3.up * minimumMandatoryFallDistance,
+                Color.red,
+                0.1f,
                 false
             );
 
             if (Physics.Raycast(
-                    origin, 
-                    -Vector3.up, 
-                    out hit, 
-                    minimumMandatoryFallDistance, 
+                    origin,
+                    -Vector3.up,
+                    out hit,
+                    minimumMandatoryFallDistance,
                     ignoreForGroundCheck
                     )
                 )
@@ -267,8 +268,8 @@ namespace DarkSouls
             if (playerManager.isInteracting || playerInputHandler.moveAmount > 0)
             {
                 myTransform.position = Vector3.Lerp(
-                    transform.position, 
-                    targetPosition, 
+                    transform.position,
+                    targetPosition,
                     Time.deltaTime
                 );
             }
