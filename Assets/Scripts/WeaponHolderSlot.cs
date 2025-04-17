@@ -2,9 +2,6 @@ using UnityEngine;
 
 namespace DarkSouls
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class WeaponHolderSlot : MonoBehaviour
     {
         public Transform parentOverride;

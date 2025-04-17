@@ -2,6 +2,10 @@ using UnityEngine;
 
 namespace DarkSouls
 {
+    /// <summary>
+    /// Represents a weapon item in the game. Inherits from the base <see cref="Item"/> class
+    /// and includes additional weapon-specific data such as a model prefab and an unarmed flag.
+    /// </summary>
     [CreateAssetMenu(menuName = "Items/ Weapon Item")]
     public class WeaponItem : Item
     {
