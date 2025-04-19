@@ -137,29 +137,6 @@ namespace DarkSouls
             else { rigidBody.linearVelocity = Vector3.zero; }
         }
 
-
-        /// <summary>
-        /// Performs a backward roll (dodge) by applying velocity in the backward direction
-        /// for the specified duration and speed. Stops player movement after completion.
-        /// </summary>
-        /// <param name="speed">The speed at which the player rolls backward.</param>
-        /// <param name="duration">The duration of the roll in seconds.</param>
-        /// <returns>An IEnumerator for coroutine execution.</returns>
-        public IEnumerator PerformRollback(float speed, float duration)
-        {
-            float timer = 0f;
-            Vector3 backwardDirection = -myTransform.forward;
-
-            while (timer < duration)
-            {
-                rigidBody.linearVelocity = backwardDirection * speed;
-                timer += Time.deltaTime;
-                yield return null;
-            }
-            rigidBody.linearVelocity = Vector3.zero; // Stop motion after rollback
-        }
-
-
         /// <summary>
         /// Handles the logic for initiating rolling and sprinting based on player input.
         /// Plays appropriate animations and initiates forward or backward roll movement depending on direction.
@@ -177,20 +154,10 @@ namespace DarkSouls
 
                 if (playerInputHandler.moveAmount > 0)
                 {
-                    animatorHandler.PlayTargetAnimation("RollForward", true);
+                    animatorHandler.animator.CrossFade("RollForward", 0.1f);
                     Quaternion rollRotation = Quaternion.LookRotation(moveDirection);
                     myTransform.rotation = rollRotation;
                     StartCoroutine(PerformRollForward(speed: 6f, duration: 0.6f));
-                    playerInputHandler.rollFlag = false; // reset after consuming input
-                }
-                else
-                {
-                    animatorHandler.PlayTargetAnimation("RollBackward", true);
-                    Vector3 backwardDirection = -myTransform.forward;
-                    backwardDirection.y = 0;
-                    Quaternion rollRotation = Quaternion.LookRotation(backwardDirection);
-                    myTransform.rotation = rollRotation;
-                    StartCoroutine(PerformRollback(speed: 6f, duration: 0.6f));
                     playerInputHandler.rollFlag = false; // reset after consuming input
                 }
             }
