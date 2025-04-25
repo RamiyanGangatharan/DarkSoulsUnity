@@ -193,6 +193,24 @@ namespace DarkSouls
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RightHandLightAttack"",
+                    ""type"": ""Button"",
+                    ""id"": ""bbe1362a-945d-4755-ae2d-eb7077f5f80f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RightHandHeavyAttack"",
+                    ""type"": ""Button"",
+                    ""id"": ""8019312f-ecb4-43f4-96b9-13ec4f3a3312"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -215,6 +233,28 @@ namespace DarkSouls
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Roll"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c7764b64-d225-4b21-b6c8-c2eafe0c4966"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RightHandLightAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8115442d-fae5-430d-9ebe-892660febfb7"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RightHandHeavyAttack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -247,6 +287,8 @@ namespace DarkSouls
             // Player Actions
             m_PlayerActions = asset.FindActionMap("Player Actions", throwIfNotFound: true);
             m_PlayerActions_Roll = m_PlayerActions.FindAction("Roll", throwIfNotFound: true);
+            m_PlayerActions_RightHandLightAttack = m_PlayerActions.FindAction("RightHandLightAttack", throwIfNotFound: true);
+            m_PlayerActions_RightHandHeavyAttack = m_PlayerActions.FindAction("RightHandHeavyAttack", throwIfNotFound: true);
         }
 
         ~@PlayerControls()
@@ -436,6 +478,8 @@ namespace DarkSouls
         private readonly InputActionMap m_PlayerActions;
         private List<IPlayerActionsActions> m_PlayerActionsActionsCallbackInterfaces = new List<IPlayerActionsActions>();
         private readonly InputAction m_PlayerActions_Roll;
+        private readonly InputAction m_PlayerActions_RightHandLightAttack;
+        private readonly InputAction m_PlayerActions_RightHandHeavyAttack;
         /// <summary>
         /// Provides access to input actions defined in input action map "Player Actions".
         /// </summary>
@@ -451,6 +495,14 @@ namespace DarkSouls
             /// Provides access to the underlying input action "PlayerActions/Roll".
             /// </summary>
             public InputAction @Roll => m_Wrapper.m_PlayerActions_Roll;
+            /// <summary>
+            /// Provides access to the underlying input action "PlayerActions/RightHandLightAttack".
+            /// </summary>
+            public InputAction @RightHandLightAttack => m_Wrapper.m_PlayerActions_RightHandLightAttack;
+            /// <summary>
+            /// Provides access to the underlying input action "PlayerActions/RightHandHeavyAttack".
+            /// </summary>
+            public InputAction @RightHandHeavyAttack => m_Wrapper.m_PlayerActions_RightHandHeavyAttack;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -480,6 +532,12 @@ namespace DarkSouls
                 @Roll.started += instance.OnRoll;
                 @Roll.performed += instance.OnRoll;
                 @Roll.canceled += instance.OnRoll;
+                @RightHandLightAttack.started += instance.OnRightHandLightAttack;
+                @RightHandLightAttack.performed += instance.OnRightHandLightAttack;
+                @RightHandLightAttack.canceled += instance.OnRightHandLightAttack;
+                @RightHandHeavyAttack.started += instance.OnRightHandHeavyAttack;
+                @RightHandHeavyAttack.performed += instance.OnRightHandHeavyAttack;
+                @RightHandHeavyAttack.canceled += instance.OnRightHandHeavyAttack;
             }
 
             /// <summary>
@@ -494,6 +552,12 @@ namespace DarkSouls
                 @Roll.started -= instance.OnRoll;
                 @Roll.performed -= instance.OnRoll;
                 @Roll.canceled -= instance.OnRoll;
+                @RightHandLightAttack.started -= instance.OnRightHandLightAttack;
+                @RightHandLightAttack.performed -= instance.OnRightHandLightAttack;
+                @RightHandLightAttack.canceled -= instance.OnRightHandLightAttack;
+                @RightHandHeavyAttack.started -= instance.OnRightHandHeavyAttack;
+                @RightHandHeavyAttack.performed -= instance.OnRightHandHeavyAttack;
+                @RightHandHeavyAttack.canceled -= instance.OnRightHandHeavyAttack;
             }
 
             /// <summary>
@@ -576,6 +640,20 @@ namespace DarkSouls
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnRoll(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "RightHandLightAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnRightHandLightAttack(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "RightHandHeavyAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnRightHandHeavyAttack(InputAction.CallbackContext context);
         }
     }
 }
