@@ -141,7 +141,8 @@ AnimatorState:
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -2797335336590002364}
-  m_StateMachineBehaviours: []
+  m_StateMachineBehaviours:
+  - {fileID: -3751934905350060820}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 1
   m_WriteDefaultValues: 1
@@ -156,6 +157,20 @@ AnimatorState:
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
+--- !u!114 &-5408429294751605972
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8142b41daf06eb04fbd4533ad55f6312, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetBool: isInteracting
+  status: 0
 --- !u!114 &-5076402255173135586
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -168,7 +183,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8142b41daf06eb04fbd4533ad55f6312, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetBool: 
+  targetBool: isInteracting
+  status: 0
+--- !u!114 &-3751934905350060820
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8142b41daf06eb04fbd4533ad55f6312, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetBool: isInteracting
   status: 0
 --- !u!114 &-3134727665681867330
 MonoBehaviour:
@@ -182,7 +211,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8142b41daf06eb04fbd4533ad55f6312, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetBool: 
+  targetBool: isInteracting
   status: 0
 --- !u!1101 &-2797335336590002364
 AnimatorStateTransition:
@@ -317,7 +346,8 @@ AnimatorState:
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 5471436224937061862}
-  m_StateMachineBehaviours: []
+  m_StateMachineBehaviours:
+  - {fileID: -5408429294751605972}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 1
   m_WriteDefaultValues: 1
