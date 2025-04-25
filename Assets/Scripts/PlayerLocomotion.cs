@@ -213,7 +213,7 @@ namespace DarkSouls
                 if (playerManager.isAerial)
                 {
                     if (AirTimer > 0.5f) { animatorHandler.PlayTargetAnimation("RollForward", true); AirTimer = 0; }
-                    else { animatorHandler.PlayTargetAnimation("Locomotion", false); AirTimer = 0; }
+                    else { animatorHandler.PlayTargetAnimation("Empty", false); AirTimer = 0; }
                     playerManager.isAerial = false;
                 }
             }
