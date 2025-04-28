@@ -19,6 +19,7 @@ namespace DarkSouls
         public bool isRolling;
         public bool isAerial;
         public bool isGrounded;
+        public bool isDead = false;
 
         public float rollInputTimer;
 
@@ -48,6 +49,8 @@ namespace DarkSouls
         // Update is called once per frame
         void Update()
         {
+            if (isDead) return;
+
             if (inputHandler != null)
             {
                 float delta = Time.deltaTime;
