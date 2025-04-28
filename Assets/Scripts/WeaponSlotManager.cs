@@ -11,6 +11,9 @@ namespace DarkSouls
         WeaponHolderSlot leftHandSlot;
         WeaponHolderSlot rightHandSlot;
 
+        DamageCollider leftHandDamageCollider;
+        DamageCollider rightHandDamageCollider;
+
         /// <summary>
         /// Initializes weapon holder slot references by searching child components.
         /// </summary>
@@ -32,9 +35,34 @@ namespace DarkSouls
         /// <param name="isLeft">If true, loads the weapon into the left hand slot; otherwise, into the right hand slot.</param>
         public void LoadWeaponOnSlot(WeaponItem weaponItem, bool isLeft)
         {
-            if (isLeft) { leftHandSlot.LoadWeaponModel(weaponItem); }
-            else { rightHandSlot.LoadWeaponModel(weaponItem); }
+            if (isLeft)
+            {
+                leftHandSlot.LoadWeaponModel(weaponItem);
+                LoadLeftWeaponDamageCollider();
+            }
+            else
+            {
+                rightHandSlot.LoadWeaponModel(weaponItem);
+                LoadRightWeaponDamageCollider();
+            }
         }
+
+        private void LoadLeftWeaponDamageCollider()
+        {
+            leftHandDamageCollider = leftHandDamageCollider.GetComponentInChildren<DamageCollider>();
+        }
+        private void LoadRightWeaponDamageCollider()
+        {
+            rightHandDamageCollider = rightHandDamageCollider.GetComponentInChildren<DamageCollider>();
+        }
+
+        public void OpenRightDamageCollider() { rightHandDamageCollider.EnableDamageCollider(); }
+
+        public void OpenLeftDamageCollider() { leftHandDamageCollider.EnableDamageCollider(); }
+
+        public void CloseRightDamageCollider() { rightHandDamageCollider.DisableDamageCollider(); }
+
+        public void CloseLeftDamageCollider() { leftHandDamageCollider.DisableDamageCollider(); }
     }
 }
 

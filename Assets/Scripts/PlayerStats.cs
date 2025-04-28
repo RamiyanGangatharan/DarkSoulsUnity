@@ -41,9 +41,9 @@ namespace DarkSouls
         /// This function will reduce your health when you take damage.
         /// </summary>
         /// <param name="damage"></param>
-        public void TakeDamage(int damage) 
-        { 
-            currentHealth = currentHealth - damage; 
+        public void TakeDamage(int damage)
+        {
+            currentHealth = currentHealth - damage;
             healthBar.SetCurrentHealth(currentHealth);
             animatorHandler.PlayTargetAnimation("GetHit", false);
 
@@ -57,5 +57,4 @@ namespace DarkSouls
             }
         }
     }
-
 }
