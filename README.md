@@ -11,4 +11,5 @@ Following a YouTube tutorial on how to make Dark Souls in Unity Engine
 - Part 6: [File Organization](https://youtu.be/hoEreco1L-c?list=PLD_vBJjpCwJtrHIW1SS5_BNRk6KZJZ7_d)
 - Part 7: [Falling Mechanics](https://youtu.be/dJdmUgqgZjU?list=PLD_vBJjpCwJtrHIW1SS5_BNRk6KZJZ7_d)
 - Part 8: [Weapon Systems](https://youtu.be/7IbW2dxxrf4?list=PLD_vBJjpCwJtrHIW1SS5_BNRk6KZJZ7_d)
-- Part 9: [Light and Heavy Attacks](https://youtu.be/cOGep0Vlayk?list=PLD_vBJjpCwJtrHIW1SS5_BNRk6KZJZ7_d) (CURRENT WORK)
+- Part 9: [Light and Heavy Attacks](https://youtu.be/cOGep0Vlayk?list=PLD_vBJjpCwJtrHIW1SS5_BNRk6KZJZ7_d) 
+- Part 10: [Player Health and Damage](https://youtu.be/iJSfBwC121c?list=PLD_vBJjpCwJtrHIW1SS5_BNRk6KZJZ7_d) (CURRENT WORK)
