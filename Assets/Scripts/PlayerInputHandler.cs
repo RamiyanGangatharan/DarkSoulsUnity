@@ -13,6 +13,8 @@ namespace DarkSouls
         public float mouseX;
         public float mouseY;
 
+        private float rollInputTimer;
+
         PlayerControls inputActions;
         PlayerAttacker playerAttacker;
         PlayerInventory playerInventory;
@@ -27,11 +29,7 @@ namespace DarkSouls
         public bool rightHandLightAttackInput;
         public bool rightHandHeavyAttackInput;
 
-        // Reference to PlayerManager
         public PlayerManager playerManager;
-
-        // Roll input timer
-        private float rollInputTimer;
 
         private void Awake()
         {

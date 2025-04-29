@@ -7,9 +7,6 @@ using UnityEngine;
 /// </summary>
 public class PlayerAttacker : MonoBehaviour
 {
-    /// <summary>
-    /// Reference to the <see cref="AnimatorHandler"/> component used for playing animations.
-    /// </summary>
     [SerializeField] private AnimatorHandler animatorHandler;
 
     /// <summary>

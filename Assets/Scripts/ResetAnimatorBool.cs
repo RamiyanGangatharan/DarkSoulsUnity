@@ -9,7 +9,8 @@ public class ResetAnimatorBool : StateMachineBehaviour
     public bool status;
 
     /// <summary>
-    /// 
+    /// Called when the state machine enters a state. Sets the specified boolean parameter 
+    /// in the Animator to the defined status, allowing for controlled animation transitions.
     /// </summary>
     /// <param name="animator"></param>
     /// <param name="stateInfo"></param>

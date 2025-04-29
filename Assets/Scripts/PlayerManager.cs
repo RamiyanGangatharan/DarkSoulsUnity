@@ -85,6 +85,9 @@ namespace DarkSouls
             else { Debug.LogError("CameraHandler is null in FixedUpdate."); }
         }
 
+        /// <summary>
+        /// This function handles all input related flags
+        /// </summary>
         private void LateUpdate()
         {
             float delta = Time.deltaTime;
